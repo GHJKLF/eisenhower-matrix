@@ -55,6 +55,7 @@ export default async function handler(req, res) {
         list: list.name,
         folder: t.folder?.name || null,
         assignees: (t.assignees || []).map((a) => ({
+          id: a.id,
           username: a.username,
           initials: a.initials,
           profilePicture: a.profilePicture,
@@ -86,11 +87,20 @@ export default async function handler(req, res) {
 
     for (const task of activeTasks) {
       switch (task.priorityId) {
-        case 1: quadrants.q1.tasks.push(task); break;
-        case 2: quadrants.q2.tasks.push(task); break;
-        case 3: quadrants.q3.tasks.push(task); break;
-        case 4: quadrants.q4.tasks.push(task); break;
-        default: quadrants.unassigned.tasks.push(task);
+        case 1:
+          quadrants.q1.tasks.push(task);
+          break;
+        case 2:
+          quadrants.q2.tasks.push(task);
+          break;
+        case 3:
+          quadrants.q3.tasks.push(task);
+          break;
+        case 4:
+          quadrants.q4.tasks.push(task);
+          break;
+        default:
+          quadrants.unassigned.tasks.push(task);
       }
     }
 
