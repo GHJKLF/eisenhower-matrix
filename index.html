@@ -1,165 +1,1126 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Eisenhower Matrix</title>
+
 <style>
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
+
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
     background: #0f0f13;
+
     color: #e5e5e5;
+
     min-height: 100vh;
+
     padding: 20px;
+
   }
-  .header { text-align: center; margin-bottom: 20px; }
+
+  .header {
+
+    text-align: center;
+
+    margin-bottom: 20px;
+
+  }
+
   .header h1 { font-size: 26px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
-  .header-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 8px; }
-  .sync-badge { font-size: 12px; color: #666; display: flex; align-items: center; gap: 6px; }
-  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
-  .sync-dot.error { background: #ef4444; animation: none; }
-  .sync-dot.loading { background: #f59e0b; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-  .refresh-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #aaa; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
-  .refresh-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-  .total-badge { font-size: 12px; color: #888; background: rgba(255,255,255,0.05); padding: 3px 10px; border-radius: 10px; }
-  .layout { display: grid; grid-template-columns: 28px 1fr; grid-template-rows: 28px 1fr; max-width: 960px; margin: 0 auto; }
-  .corner {}
-  .x-axis { display: flex; align-items: center; justify-content: center; gap: 6px; padding-bottom: 6px; }
-  .x-axis span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #555; }
-  .y-axis { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-right: 6px; }
-  .y-axis span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #555; writing-mode: vertical-rl; transform: rotate(180deg); }
-  .matrix { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; min-height: 480px; }
-  .quadrant { border-radius: 14px; padding: 16px; transition: transform 0.15s; display: flex; flex-direction: column; overflow: hidden; }
-  .q-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-shrink: 0; }
-  .q-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; }
-  .q-title { font-size: 15px; font-weight: 700; }
-  .q-subtitle { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
-  .q-count { margin-left: auto; font-size: 11px; padding: 2px 8px; border-radius: 8px; font-weight: 600; }
-  .q1 { background: linear-gradient(135deg, #1a0f0f, #2a1515); border: 1px solid #3d1f1f; }
-  .q1 .q-icon { background: #ef4444; color: #fff; }
-  .q1 .q-title { color: #fca5a5; }
-  .q1 .q-subtitle { color: #f87171; }
-  .q1 .q-count { background: rgba(239,68,68,0.15); color: #f87171; }
-  .q2 { background: linear-gradient(135deg, #0f1420, #152035); border: 1px solid #1e3050; }
-  .q2 .q-icon { background: #3b82f6; color: #fff; }
-  .q2 .q-title { color: #93c5fd; }
-  .q2 .q-subtitle { color: #60a5fa; }
-  .q2 .q-count { background: rgba(59,130,246,0.15); color: #60a5fa; }
-  .q3 { background: linear-gradient(135deg, #1a1508, #2a2210); border: 1px solid #3d3318; }
-  .q3 .q-icon { background: #f59e0b; color: #fff; }
-  .q3 .q-title { color: #fcd34d; }
-  .q3 .q-subtitle { color: #fbbf24; }
-  .q3 .q-count { background: rgba(245,158,11,0.15); color: #fbbf24; }
-  .q4 { background: linear-gradient(135deg, #0f1a12, #152a1a); border: 1px solid #1e3d25; }
-  .q4 .q-icon { background: #22c55e; color: #fff; }
-  .q4 .q-title { color: #86efac; }
-  .q4 .q-subtitle { color: #4ade80; }
-  .q4 .q-count { background: rgba(34,197,94,0.15); color: #4ade80; }
-  .task-list { list-style: none; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
-  .task-list::-webkit-scrollbar { width: 4px; }
-  .task-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-  .task { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); text-decoration: none; color: inherit; transition: all 0.15s; cursor: pointer; }
-  .task:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); transform: translateX(2px); }
-  .task-check { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15); flex-shrink: 0; margin-top: 1px; }
-  .task:hover .task-check { border-color: rgba(255,255,255,0.35); }
-  .task-content { flex: 1; min-width: 0; }
-  .task-name { font-size: 12px; font-weight: 500; line-height: 1.3; color: #e5e5e5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .task-meta { font-size: 10px; color: #555; margin-top: 2px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; }
-  .status-badge { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
-  .status-todo { background: rgba(239,68,68,0.15); color: #f87171; }
-  .status-progress { background: rgba(245,158,11,0.15); color: #fbbf24; }
-  .status-other { background: rgba(255,255,255,0.08); color: #888; }
-  .clickup-link { font-size: 9px; color: #444; opacity: 0; transition: opacity 0.15s; }
-  .task:hover .clickup-link { opacity: 1; color: #7b68ee; }
-  .assignee-avatar { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
-  .assignee-initials { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 600; color: #aaa; flex-shrink: 0; }
-  .empty-state { text-align: center; padding: 24px; color: #444; font-size: 12px; }
-  .loading-state { display: flex; align-items: center; justify-content: center; min-height: 480px; color: #666; font-size: 14px; }
-  .loading-spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.1); border-top-color: #7b68ee; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .unassigned-bar { max-width: 960px; margin: 12px auto 0; border-radius: 10px; background: linear-gradient(135deg, #15151a, #1a1a22); border: 1px solid #2a2a35; padding: 12px 16px; display: none; }
-  .unassigned-bar.visible { display: block; }
-  .unassigned-header { font-size: 12px; font-weight: 600; color: #888; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-  .unassigned-tasks { display: flex; flex-wrap: wrap; gap: 6px; }
-  .unassigned-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); font-size: 11px; color: #aaa; text-decoration: none; transition: all 0.15s; }
-  .unassigned-chip:hover { background: rgba(255,255,255,0.08); border-color: rgba(123,104,238,0.3); color: #ddd; }
-  @media (max-width: 700px) { .matrix { grid-template-columns: 1fr; grid-template-rows: auto; min-height: auto; } .layout { grid-template-columns: 1fr; grid-template-rows: 1fr; } .x-axis, .y-axis, .corner { display: none; } body { padding: 12px; } }
-</style>
-</head>
-<body>
-<div class="header">
-  <h1>Eisenhower Matrix</h1>
-  <div class="header-row">
-    <div class="sync-badge"><div class="sync-dot loading" id="syncDot"></div><span id="syncText">Syncing with ClickUp...</span></div>
-    <span class="total-badge" id="totalBadge"></span>
-    <button class="refresh-btn" onclick="loadTasks()">Refresh</button>
-  </div>
-</div>
-<div id="loadingState" class="loading-state"><div class="loading-spinner"></div>Loading tasks from ClickUp...</div>
-<div id="mainContent" style="display:none;">
-  <div class="layout">
-    <div class="corner"></div>
-    <div class="x-axis"><span>- </span><span>Important</span><span> +</span></div>
-    <div class="y-axis"><span>Urgent</span></div>
-    <div class="matrix">
-      <div class="quadrant q1"><div class="q-header"><div class="q-icon">1</div><div><div class="q-title">Do First</div><div class="q-subtitle">Urgent + Important</div></div><span class="q-count" id="q1Count">0</span></div><ul class="task-list" id="q1Tasks"></ul></div>
-      <div class="quadrant q2"><div class="q-header"><div class="q-icon">2</div><div><div class="q-title">Schedule</div><div class="q-subtitle">Important + Not Urgent</div></div><span class="q-count" id="q2Count">0</span></div><ul class="task-list" id="q2Tasks"></ul></div>
-      <div class="quadrant q3"><div class="q-header"><div class="q-icon">3</div><div><div class="q-title">Delegate</div><div class="q-subtitle">Urgent + Not Important</div></div><span class="q-count" id="q3Count">0</span></div><ul class="task-list" id="q3Tasks"></ul></div>
-      <div class="quadrant q4"><div class="q-header"><div class="q-icon">4</div><div><div class="q-title">Backlog</div><div class="q-subtitle">Not Urgent + Not Important</div></div><span class="q-count" id="q4Count">0</span></div><ul class="task-list" id="q4Tasks"></ul></div>
-    </div>
-  </div>
-  <div class="unassigned-bar" id="unassignedBar"><div class="unassigned-header"><span>No priority assigned - set priority in ClickUp to place in matrix</span></div><div class="unassigned-tasks" id="unassignedTasks"></div></div>
-</div>
-<script>
-function getStatusClass(status) {
-  const s = status.toLowerCase();
-  if (s === 'to do' || s === 'open' || s === 'todo') return 'status-todo';
-  if (s === 'in progress' || s === 'in review' || s === 'active') return 'status-progress';
-  return 'status-other';
-}
-function renderTask(task) {
-  const assigneeHtml = task.assignees.length > 0 ? task.assignees.map(a => a.profilePicture ? '<img class="assignee-avatar" src="' + a.profilePicture + '" alt="' + a.username + '" title="' + a.username + '">' : '<span class="assignee-initials" title="' + a.username + '">' + (a.initials || '?') + '</span>').join('') : '';
-  return '<li><a class="task" href="' + task.url + '" target="_blank" rel="noopener">' + assigneeHtml + '<div class="task-content"><div class="task-name" title="' + task.name + '">' + task.name + '</div><div class="task-meta"><span class="status-badge ' + getStatusClass(task.status) + '">' + task.status + '</span><span>' + task.list + '</span><span class="clickup-link">Open</span></div></div></a></li>';
-}
-function renderUnassignedChip(task) {
-  return '<a class="unassigned-chip" href="' + task.url + '" target="_blank" rel="noopener">' + task.name + '</a>';
-}
-async function loadTasks() {
-  const dot = document.getElementById('syncDot');
-  const text = document.getElementById('syncText');
-  dot.className = 'sync-dot loading';
-  text.textContent = 'Syncing with ClickUp...';
-  try {
-    const res = await fetch('/api/tasks');
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    const { quadrants, meta } = data;
-    ['q1','q2','q3','q4'].forEach(key => {
-      const container = document.getElementById(key + 'Tasks');
-      const count = document.getElementById(key + 'Count');
-      const tasks = quadrants[key].tasks;
-      count.textContent = tasks.length;
-      container.innerHTML = tasks.length > 0 ? tasks.map(renderTask).join('') : '<div class="empty-state">No tasks</div>';
-    });
-    const unassigned = quadrants.unassigned.tasks;
-    const bar = document.getElementById('unassignedBar');
-    if (unassigned.length > 0) { bar.classList.add('visible'); document.getElementById('unassignedTasks').innerHTML = unassigned.map(renderUnassignedChip).join(''); } else { bar.classList.remove('visible'); }
-    document.getElementById('totalBadge').textContent = meta.totalTasks + ' active tasks';
-    const syncTime = new Date(meta.syncedAt).toLocaleTimeString();
-    dot.className = 'sync-dot';
-    text.textContent = 'Synced at ' + syncTime;
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-  } catch (err) {
-    dot.className = 'sync-dot error';
-    text.textContent = 'Sync failed: ' + err.message;
-    document.getElementById('loadingState').innerHTML = '<div style="color:#f87171;text-align:center;">Failed to load: ' + err.message + '</div>';
+
+  .header-row {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 16px;
+
+    margin-top: 8px;
+
   }
+
+  .sync-badge {
+
+    font-size: 12px;
+
+    color: #666;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+  }
+
+  .sync-dot {
+
+    width: 6px; height: 6px; border-radius: 50%;
+
+    background: #22c55e;
+
+    animation: pulse 2s infinite;
+
+  }
+
+  .sync-dot.error { background: #ef4444; animation: none; }
+
+  .sync-dot.loading { background: #f59e0b; }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .refresh-btn {
+
+    background: rgba(255,255,255,0.06);
+
+    border: 1px solid rgba(255,255,255,0.1);
+
+    color: #aaa;
+
+    padding: 4px 10px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    cursor: pointer;
+
+    transition: all 0.15s;
+
+  }
+
+  .refresh-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+  .total-badge {
+
+    font-size: 12px;
+
+    color: #888;
+
+    background: rgba(255,255,255,0.05);
+
+    padding: 3px 10px;
+
+    border-radius: 10px;
+
+  }
+
+
+
+  .layout {
+
+    display: grid;
+
+    grid-template-columns: 28px 1fr;
+
+    grid-template-rows: 28px 1fr;
+
+    max-width: 960px;
+
+    margin: 0 auto;
+
+  }
+
+  .corner {}
+
+  .x-axis {
+
+    display: flex; align-items: center; justify-content: center; gap: 6px; padding-bottom: 6px;
+
+  }
+
+  .x-axis span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #555; }
+
+  .y-axis {
+
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding-right: 6px;
+
+  }
+
+  .y-axis span {
+
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #555;
+
+    writing-mode: vertical-rl; transform: rotate(180deg);
+
+  }
+
+
+
+  .matrix {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    grid-template-rows: 1fr 1fr;
+
+    gap: 10px;
+
+    min-height: 480px;
+
+  }
+
+  .quadrant {
+
+    border-radius: 14px;
+
+    padding: 16px;
+
+    transition: transform 0.15s;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+  }
+
+  .q-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-shrink: 0; }
+
+  .q-icon {
+
+    width: 32px; height: 32px; border-radius: 8px;
+
+    display: flex; align-items: center; justify-content: center;
+
+    font-size: 16px; font-weight: 700;
+
+  }
+
+  .q-title { font-size: 15px; font-weight: 700; }
+
+  .q-subtitle { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+
+  .q-count {
+
+    margin-left: auto;
+
+    font-size: 11px;
+
+    padding: 2px 8px;
+
+    border-radius: 8px;
+
+    font-weight: 600;
+
+  }
+
+
+
+  .q1 { background: linear-gradient(135deg, #1a0f0f, #2a1515); border: 1px solid #3d1f1f; }
+
+  .q1 .q-icon { background: #ef4444; color: #fff; }
+
+  .q1 .q-title { color: #fca5a5; }
+
+  .q1 .q-subtitle { color: #f87171; }
+
+  .q1 .q-count { background: rgba(239,68,68,0.15); color: #f87171; }
+
+
+
+  .q2 { background: linear-gradient(135deg, #0f1420, #152035); border: 1px solid #1e3050; }
+
+  .q2 .q-icon { background: #3b82f6; color: #fff; }
+
+  .q2 .q-title { color: #93c5fd; }
+
+  .q2 .q-subtitle { color: #60a5fa; }
+
+  .q2 .q-count { background: rgba(59,130,246,0.15); color: #60a5fa; }
+
+
+
+  .q3 { background: linear-gradient(135deg, #1a1508, #2a2210); border: 1px solid #3d3318; }
+
+  .q3 .q-icon { background: #f59e0b; color: #fff; }
+
+  .q3 .q-title { color: #fcd34d; }
+
+  .q3 .q-subtitle { color: #fbbf24; }
+
+  .q3 .q-count { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+
+
+  .q4 { background: linear-gradient(135deg, #0f1a12, #152a1a); border: 1px solid #1e3d25; }
+
+  .q4 .q-icon { background: #22c55e; color: #fff; }
+
+  .q4 .q-title { color: #86efac; }
+
+  .q4 .q-subtitle { color: #4ade80; }
+
+  .q4 .q-count { background: rgba(34,197,94,0.15); color: #4ade80; }
+
+
+
+  .task-list {
+
+    list-style: none;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    overflow-y: auto;
+
+    flex: 1;
+
+    scrollbar-width: thin;
+
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+
+  }
+
+  .task-list::-webkit-scrollbar { width: 4px; }
+
+  .task-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+
+
+  .task {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 8px;
+
+    padding: 8px 10px;
+
+    border-radius: 8px;
+
+    background: rgba(255,255,255,0.04);
+
+    border: 1px solid rgba(255,255,255,0.06);
+
+    text-decoration: none;
+
+    color: inherit;
+
+    transition: all 0.15s;
+
+    cursor: pointer;
+
+  }
+
+  .task:hover {
+
+    background: rgba(255,255,255,0.08);
+
+    border-color: rgba(255,255,255,0.12);
+
+    transform: translateX(2px);
+
+  }
+
+  .task-check {
+
+    width: 16px; height: 16px; border-radius: 50%;
+
+    border: 2px solid rgba(255,255,255,0.15);
+
+    flex-shrink: 0; margin-top: 1px;
+
+  }
+
+  .task:hover .task-check { border-color: rgba(255,255,255,0.35); }
+
+  .task-content { flex: 1; min-width: 0; }
+
+  .task-name {
+
+    font-size: 12px; font-weight: 500; line-height: 1.3; color: #e5e5e5;
+
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+
+  }
+
+  .task-meta {
+
+    font-size: 10px; color: #555; margin-top: 2px;
+
+    display: flex; align-items: center; gap: 6px;
+
+    white-space: nowrap; overflow: hidden;
+
+  }
+
+  .status-badge {
+
+    display: inline-block; padding: 1px 5px; border-radius: 3px;
+
+    font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+
+  }
+
+  .status-todo { background: rgba(239,68,68,0.15); color: #f87171; }
+
+  .status-progress { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+  .status-other { background: rgba(255,255,255,0.08); color: #888; }
+
+  .clickup-link { font-size: 9px; color: #444; opacity: 0; transition: opacity 0.15s; }
+
+  .task:hover .clickup-link { opacity: 1; color: #7b68ee; }
+
+
+
+  .assignee-avatar {
+
+    width: 16px; height: 16px; border-radius: 50%;
+
+    border: 1px solid rgba(255,255,255,0.1);
+
+    flex-shrink: 0;
+
+  }
+
+  .assignee-initials {
+
+    width: 16px; height: 16px; border-radius: 50%;
+
+    background: rgba(255,255,255,0.1);
+
+    display: flex; align-items: center; justify-content: center;
+
+    font-size: 8px; font-weight: 600; color: #aaa;
+
+    flex-shrink: 0;
+
+  }
+
+
+
+  .empty-state {
+
+    text-align: center; padding: 24px; color: #444; font-size: 12px;
+
+  }
+
+  .loading-state {
+
+    display: flex; align-items: center; justify-content: center;
+
+    min-height: 480px; color: #666; font-size: 14px;
+
+  }
+
+  .loading-spinner {
+
+    width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.1);
+
+    border-top-color: #7b68ee; border-radius: 50%;
+
+    animation: spin 0.8s linear infinite; margin-right: 10px;
+
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+
+
+  .filters {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-bottom: 16px;
+
+  }
+
+  .filter-btn {
+
+    background: rgba(255,255,255,0.06);
+
+    border: 1px solid rgba(255,255,255,0.1);
+
+    color: #888;
+
+    padding: 6px 14px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: all 0.15s;
+
+  }
+
+  .filter-btn:hover { background: rgba(255,255,255,0.1); color: #ccc; }
+
+  .filter-btn.active {
+
+    background: rgba(123,104,238,0.2);
+
+    border-color: rgba(123,104,238,0.4);
+
+    color: #a78bfa;
+
+  }
+
+  .filter-select {
+
+    background: rgba(255,255,255,0.06);
+
+    border: 1px solid rgba(255,255,255,0.1);
+
+    color: #888;
+
+    padding: 6px 12px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    cursor: pointer;
+
+    appearance: none;
+
+    -webkit-appearance: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");
+
+    background-repeat: no-repeat;
+
+    background-position: right 10px center;
+
+    padding-right: 26px;
+
+  }
+
+  .filter-select:focus { outline: none; border-color: rgba(123,104,238,0.4); }
+
+  .filter-select.active {
+
+    background-color: rgba(123,104,238,0.2);
+
+    border-color: rgba(123,104,238,0.4);
+
+    color: #a78bfa;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a78bfa'/%3E%3C/svg%3E");
+
+  }
+
+
+
+  .unassigned-bar {
+
+    max-width: 960px;
+
+    margin: 12px auto 0;
+
+    border-radius: 10px;
+
+    background: linear-gradient(135deg, #15151a, #1a1a22);
+
+    border: 1px solid #2a2a35;
+
+    padding: 12px 16px;
+
+    display: none;
+
+  }
+
+  .unassigned-bar.visible { display: block; }
+
+  .unassigned-header {
+
+    font-size: 12px; font-weight: 600; color: #888; margin-bottom: 8px;
+
+    display: flex; align-items: center; gap: 6px;
+
+  }
+
+  .unassigned-tasks {
+
+    display: flex; flex-wrap: wrap; gap: 6px;
+
+  }
+
+  .unassigned-chip {
+
+    display: inline-flex; align-items: center; gap: 4px;
+
+    padding: 4px 10px; border-radius: 6px;
+
+    background: rgba(255,255,255,0.04);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    font-size: 11px; color: #aaa;
+
+    text-decoration: none;
+
+    transition: all 0.15s;
+
+  }
+
+  .unassigned-chip:hover {
+
+    background: rgba(255,255,255,0.08);
+
+    border-color: rgba(123,104,238,0.3);
+
+    color: #ddd;
+
+  }
+
+
+
+  @media (max-width: 700px) {
+
+    .matrix { grid-template-columns: 1fr; grid-template-rows: auto; min-height: auto; }
+
+    .layout { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+
+    .x-axis, .y-axis, .corner { display: none; }
+
+    body { padding: 12px; }
+
+  }
+
+</style>
+
+</head>
+
+<body>
+
+
+
+<div class="header">
+
+  <h1>Eisenhower Matrix</h1>
+
+  <div class="header-row">
+
+    <div class="sync-badge">
+
+      <div class="sync-dot loading" id="syncDot"></div>
+
+      <span id="syncText">Syncing with ClickUp...</span>
+
+    </div>
+
+    <span class="total-badge" id="totalBadge"></span>
+
+    <button class="refresh-btn" onclick="loadTasks()">Refresh</button>
+
+  </div>
+
+</div>
+
+
+
+<div class="filters" id="filterBar" style="display:none;">
+
+  <button class="filter-btn" id="filterWeek" onclick="toggleWeekFilter()">This Week</button>
+
+  <select class="filter-select" id="filterAssignee" onchange="applyFilters()">
+
+    <option value="">Everyone</option>
+
+  </select>
+
+</div>
+
+
+
+<div id="loadingState" class="loading-state">
+
+  <div class="loading-spinner"></div>
+
+  Loading tasks from ClickUp...
+
+</div>
+
+
+
+<div id="mainContent" style="display:none;">
+
+  <div class="layout">
+
+    <div class="corner"></div>
+
+    <div class="x-axis"><span>- </span><span>Important</span><span> +</span></div>
+
+    <div class="y-axis"><span>Urgent</span></div>
+
+    <div class="matrix">
+
+      <div class="quadrant q1">
+
+        <div class="q-header">
+
+          <div class="q-icon">1</div>
+
+          <div><div class="q-title">Do First</div><div class="q-subtitle">Urgent + Important</div></div>
+
+          <span class="q-count" id="q1Count">0</span>
+
+        </div>
+
+        <ul class="task-list" id="q1Tasks"></ul>
+
+      </div>
+
+      <div class="quadrant q2">
+
+        <div class="q-header">
+
+          <div class="q-icon">2</div>
+
+          <div><div class="q-title">Schedule</div><div class="q-subtitle">Important + Not Urgent</div></div>
+
+          <span class="q-count" id="q2Count">0</span>
+
+        </div>
+
+        <ul class="task-list" id="q2Tasks"></ul>
+
+      </div>
+
+      <div class="quadrant q3">
+
+        <div class="q-header">
+
+          <div class="q-icon">3</div>
+
+          <div><div class="q-title">Delegate</div><div class="q-subtitle">Urgent + Not Important</div></div>
+
+          <span class="q-count" id="q3Count">0</span>
+
+        </div>
+
+        <ul class="task-list" id="q3Tasks"></ul>
+
+      </div>
+
+      <div class="quadrant q4">
+
+        <div class="q-header">
+
+          <div class="q-icon">4</div>
+
+          <div><div class="q-title">Backlog</div><div class="q-subtitle">Not Urgent + Not Important</div></div>
+
+          <span class="q-count" id="q4Count">0</span>
+
+        </div>
+
+        <ul class="task-list" id="q4Tasks"></ul>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="unassigned-bar" id="unassignedBar">
+
+    <div class="unassigned-header">
+
+      <span>No priority assigned - set priority in ClickUp to place in matrix</span>
+
+    </div>
+
+    <div class="unassigned-tasks" id="unassignedTasks"></div>
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+let rawData = null;
+
+let weekFilter = false;
+
+let assigneeFilter = '';
+
+
+
+function getStatusClass(status) {
+
+  const s = status.toLowerCase();
+
+  if (s === 'to do' || s === 'open' || s === 'todo') return 'status-todo';
+
+  if (s === 'in progress' || s === 'in review' || s === 'active') return 'status-progress';
+
+  return 'status-other';
+
 }
+
+
+
+function renderTask(task) {
+
+  const assigneeHtml = task.assignees.length > 0
+
+    ? task.assignees.map(a =>
+
+        a.profilePicture
+
+          ? `<img class="assignee-avatar" src="${a.profilePicture}" alt="${a.username}" title="${a.username}">`
+
+          : `<span class="assignee-initials" title="${a.username}">${a.initials || '?'}</span>`
+
+      ).join('')
+
+    : '';
+
+
+
+  const dueBadge = task.dueDate
+
+    ? `<span style="color:#666;">${new Date(task.dueDate).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>`
+
+    : '';
+
+
+
+  return `<li>
+
+    <a class="task" href="${task.url}" target="_blank" rel="noopener">
+
+      ${assigneeHtml}
+
+      <div class="task-content">
+
+        <div class="task-name" title="${task.name}">${task.name}</div>
+
+        <div class="task-meta">
+
+          <span class="status-badge ${getStatusClass(task.status)}">${task.status}</span>
+
+          <span>${task.list}</span>
+
+          ${dueBadge}
+
+          <span class="clickup-link">Open</span>
+
+        </div>
+
+      </div>
+
+    </a>
+
+  </li>`;
+
+}
+
+
+
+function renderUnassignedChip(task) {
+
+  return `<a class="unassigned-chip" href="${task.url}" target="_blank" rel="noopener">
+
+    ${task.name}
+
+  </a>`;
+
+}
+
+
+
+function getWeekRange() {
+
+  const now = new Date();
+
+  const day = now.getDay();
+
+  const mon = new Date(now);
+
+  mon.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+
+  mon.setHours(0,0,0,0);
+
+  const sun = new Date(mon);
+
+  sun.setDate(mon.getDate() + 6);
+
+  sun.setHours(23,59,59,999);
+
+  return { start: mon, end: sun };
+
+}
+
+
+
+function filterTasks(tasks) {
+
+  let filtered = tasks;
+
+  if (weekFilter) {
+
+    const { start, end } = getWeekRange();
+
+    filtered = filtered.filter(t => {
+
+      if (!t.dueDate) return false;
+
+      const d = new Date(t.dueDate);
+
+      return d >= start && d <= end;
+
+    });
+
+  }
+
+  if (assigneeFilter) {
+
+    filtered = filtered.filter(t =>
+
+      t.assignees.some(a => a.username === assigneeFilter)
+
+    );
+
+  }
+
+  return filtered;
+
+}
+
+
+
+function toggleWeekFilter() {
+
+  weekFilter = !weekFilter;
+
+  document.getElementById('filterWeek').classList.toggle('active', weekFilter);
+
+  applyFilters();
+
+}
+
+
+
+function applyFilters() {
+
+  assigneeFilter = document.getElementById('filterAssignee').value;
+
+  document.getElementById('filterAssignee').classList.toggle('active', !!assigneeFilter);
+
+  if (!rawData) return;
+
+  renderData(rawData);
+
+}
+
+
+
+function buildAssigneeDropdown(quadrants) {
+
+  const seen = new Map();
+
+  for (const q of Object.values(quadrants)) {
+
+    for (const t of q.tasks) {
+
+      for (const a of t.assignees) {
+
+        if (a.username && !seen.has(a.username)) {
+
+          seen.set(a.username, a.username);
+
+        }
+
+      }
+
+    }
+
+  }
+
+  const select = document.getElementById('filterAssignee');
+
+  const current = select.value;
+
+  select.innerHTML = '<option value="">Everyone</option>';
+
+  [...seen.keys()].sort().forEach(name => {
+
+    const opt = document.createElement('option');
+
+    opt.value = name;
+
+    opt.textContent = name;
+
+    select.appendChild(opt);
+
+  });
+
+  select.value = current;
+
+}
+
+
+
+function renderData(data) {
+
+  const { quadrants, meta } = data;
+
+
+
+  let totalShown = 0;
+
+  ['q1','q2','q3','q4'].forEach(key => {
+
+    const container = document.getElementById(key + 'Tasks');
+
+    const count = document.getElementById(key + 'Count');
+
+    const tasks = filterTasks(quadrants[key].tasks);
+
+    totalShown += tasks.length;
+
+    count.textContent = tasks.length;
+
+    container.innerHTML = tasks.length > 0
+
+      ? tasks.map(renderTask).join('')
+
+      : '<div class="empty-state">No tasks</div>';
+
+  });
+
+
+
+  const unassigned = filterTasks(quadrants.unassigned.tasks);
+
+  const bar = document.getElementById('unassignedBar');
+
+  if (unassigned.length > 0) {
+
+    bar.classList.add('visible');
+
+    document.getElementById('unassignedTasks').innerHTML =
+
+      unassigned.map(renderUnassignedChip).join('');
+
+  } else {
+
+    bar.classList.remove('visible');
+
+  }
+
+
+
+  const label = (weekFilter || assigneeFilter)
+
+    ? totalShown + ' of ' + meta.totalTasks + ' tasks'
+
+    : meta.totalTasks + ' active tasks';
+
+  document.getElementById('totalBadge').textContent = label;
+
+}
+
+
+
+async function loadTasks() {
+
+  const dot = document.getElementById('syncDot');
+
+  const text = document.getElementById('syncText');
+
+  dot.className = 'sync-dot loading';
+
+  text.textContent = 'Syncing with ClickUp...';
+
+
+
+  try {
+
+    const res = await fetch('/api/tasks');
+
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+
+
+    rawData = data;
+
+    buildAssigneeDropdown(data.quadrants);
+
+    renderData(data);
+
+
+
+    const syncTime = new Date(data.meta.syncedAt).toLocaleTimeString();
+
+    dot.className = 'sync-dot';
+
+    text.textContent = 'Synced at ' + syncTime;
+
+
+
+    document.getElementById('loadingState').style.display = 'none';
+
+    document.getElementById('mainContent').style.display = 'block';
+
+    document.getElementById('filterBar').style.display = 'flex';
+
+
+
+  } catch (err) {
+
+    dot.className = 'sync-dot error';
+
+    text.textContent = 'Sync failed: ' + err.message;
+
+    document.getElementById('loadingState').innerHTML =
+
+      '<div style="color:#f87171;text-align:center;">Failed to load: ' + err.message + '</div>';
+
+  }
+
+}
+
+
+
 loadTasks();
+
 setInterval(loadTasks, 5 * 60 * 1000);
+
 </script>
+
+
+
 </body>
+
 </html>
+
